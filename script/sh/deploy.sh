@@ -1,7 +1,1 @@
-deploy() {
-  NETWORK=$1
-
-	forge script script/Deploy.s.sol -f $NETWORK -vvvv --json --silent --broadcast --verify --slow
-}
-
-deploy $1
+forge script script/Deploy.s.sol -f http://127.0.0.1:8545 -vvvv --json --silent --broadcast --verify --slow
