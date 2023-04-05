@@ -5,3 +5,6 @@
 [submodule "lib/create3-factory"]
 	path = lib/create3-factory
 	url = https://github.com/lifinance/create3-factory
+[submodule "lib/pmmp"]
+	path = lib/pmmp
+	url = https://github.com/numoen/pmmp
