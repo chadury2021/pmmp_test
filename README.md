@@ -37,11 +37,11 @@ forge test
 In order to test third party integrations such as interfaces, it is possible to set up a forked mainnet with several positions open
 
 ```bash
-sh anvil.sh
+sh ./scripts/sh/anvil.sh
 ```
 
 then, in a separate terminal,
 
 ```bash
-sh setup.sh
+sh ./scripts/sh/setup.sh
 ```
