@@ -30,7 +30,7 @@ wrap_comments = true
 [rpc_endpoints]
 mainnet = "${RPC_URL_MAINNET}"
 arbitrum = "${RPC_URL_ARBITRUM}"
-goerli = "${RPC_URL_GOERLI}"
+goerli = "https://rpc.ankr.com/eth_goerli"
 celo = "${RPC_URL_CELO}"
 polygon = "https://polygon-rpc.com"
 
