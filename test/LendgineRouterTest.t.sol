@@ -122,7 +122,7 @@ contract LendgineRouterTest is TestHelper {
     assertEq(0.1 ether, lendgine.totalLiquidityBorrowed());
 
     // check user balances
-    assertApproxEqRel(0.9 ether, token1.balanceOf(cuh), 1 ether);
+    assertApproxEqRel(0.9 ether, token1.balanceOf(cuh), 0.001 ether);
 
     // check router token balances
     assertEq(0, token0.balanceOf(address(lendgineRouter)));

@@ -54,7 +54,7 @@ contract SwapTest is TestHelper {
     );
   }
 
-  function testEmit() external {
+  function testSwapEmit() external {
     token0.mint(cuh, 24 ether);
 
     vm.prank(cuh);
