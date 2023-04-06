@@ -14,6 +14,7 @@ contract ImmutableStateTest is Test {
     lendgine = Lendgine(factory.createLendgine(address(1), address(2), 18, 18, 1e18));
   }
 
+  /// @notice Test lendgine was created with the correct parameters
   function testImmutableState() external {
     assertEq(address(1), lendgine.token0());
     assertEq(address(2), lendgine.token1());
