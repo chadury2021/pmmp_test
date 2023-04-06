@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity ^0.8.0;
 
+import { console2 } from "forge-std/console2.sol";
 import { Lendgine } from "../src/core/Lendgine.sol";
 import { LendgineRouter } from "../src/periphery/LendgineRouter.sol";
 import { SwapHelper } from "../src/periphery/SwapHelper.sol";
@@ -86,13 +87,15 @@ contract LendgineRouterTest is TestHelper {
   }
 
   function testMintNoBorrow() external {
+    // mint 1 ether of token1 to cuh
     token1.mint(cuh, 1 ether);
 
     vm.prank(cuh);
+    // cuh approves 1 ether to lendgineRouter
     token1.approve(address(lendgineRouter), 1 ether);
 
     vm.prank(cuh);
-    lendgineRouter.mint(
+    uint256 mint_res = lendgineRouter.mint(
       LendgineRouter.MintParams({
         token0: address(token0),
         token1: address(token1),
@@ -108,6 +111,8 @@ contract LendgineRouterTest is TestHelper {
         deadline: block.timestamp
       })
     );
+
+    console2.log("mint_res", mint_res);
 
     // check option amounts
     assertEq(0.1 ether, lendgine.totalSupply());
@@ -155,6 +160,8 @@ contract LendgineRouterTest is TestHelper {
     );
 
     // check option amounts
+    // collateral = amountIn + amountBorrow = 9.8 ether
+    // liquidity = collateral / (2 * upperBound) = 9.8 / (5 * 2) = 0.98 ether
     assertEq(0.98 ether, lendgine.totalSupply());
     assertEq(0.98 ether, lendgine.balanceOf(cuh));
 

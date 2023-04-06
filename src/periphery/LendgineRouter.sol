@@ -2,6 +2,7 @@
 pragma solidity ^0.8.4;
 
 import { Multicall } from "./Multicall.sol";
+import { console2 } from "forge-std/console2.sol";
 import { Payment } from "./Payment.sol";
 import { SelfPermit } from "./SelfPermit.sol";
 import { SwapHelper } from "./SwapHelper.sol";
@@ -144,9 +145,31 @@ contract LendgineRouter is Multicall, Payment, SelfPermit, SwapHelper, IMintCall
       factory, params.token0, params.token1, params.token0Exp, params.token1Exp, params.upperBound
     );
 
-    shares = ILendgine(lendgine).mint(
+
+    ILendgine le = ILendgine(lendgine);
+
+    uint256 collateral = params.amountIn + params.amountBorrow;
+    uint256 upperBound = le.upperBound();
+    uint256 token1Scale = le.token1Scale();
+    uint256 totalLiquidityBorrowed = le.totalLiquidityBorrowed();
+
+    uint256 liquidity = FullMath.mulDiv(collateral * token1Scale, 1e18, 2 * upperBound);
+
+    console2.log("---------convertCollateralToLiquidity---------");
+    console2.log("collateral              ", collateral);
+    console2.log("token1Scale             ", token1Scale);
+    console2.log("collateral * token1Scale", collateral * token1Scale);
+    console2.log("*");
+    console2.log("1e18                    ", 1e18, "");
+    console2.log("/");
+    console2.log("2 * upperBound          ", 2 * upperBound);
+    console2.log("=");
+    console2.log("liquidity               ", liquidity);
+    console2.log("----------------------------------------------");
+
+    shares = le.mint(
       address(this),
-      params.amountIn + params.amountBorrow,
+      collateral,
       abi.encode(
         MintCallbackData({
           token0: params.token0,
@@ -161,8 +184,25 @@ contract LendgineRouter is Multicall, Payment, SelfPermit, SwapHelper, IMintCall
         })
       )
     );
+
+    // uint256 _totalLiquidityBorrowed = totalLiquidityBorrowed; // SLOAD
+    // return _totalLiquidityBorrowed == 0 ? liquidity : FullMath.mulDiv(liquidity, totalSupply, _totalLiquidityBorrowed);
+    console2.log("-----------convertLiquidityToShare------------");
+    console2.log("totalLiquidityBorrowed     ", totalLiquidityBorrowed);
+    if (totalLiquidityBorrowed != 0) {
+      console2.log("liquidity             ", liquidity);
+      console2.log("*");
+      console2.log("totalSupply           ");
+      console2.log("/");
+      console2.log("totalLiquidityBorrowed", totalLiquidityBorrowed);
+    }
+    console2.log("=");
+    console2.log("shares        ", shares);
+    console2.log("----------------------------------------------");
+
     if (shares < params.sharesMin) revert AmountError();
 
+    // transfer power tokens to recipient (amount = shares)
     SafeTransferLib.safeTransfer(lendgine, params.recipient, shares);
 
     emit Mint(msg.sender, lendgine, params.amountIn, shares, params.recipient);
