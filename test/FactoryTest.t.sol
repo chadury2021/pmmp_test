@@ -23,12 +23,14 @@ contract FactoryTest is Test {
     factory = new Factory();
   }
 
+  /// @notice Test that the factory holds the lendgine after creation and you can get it
   function testGetLendgine() external {
     address lendgine = factory.createLendgine(address(1), address(2), 18, 18, 1e18);
 
     assertEq(lendgine, factory.getLendgine(address(1), address(2), 18, 18, 1e18));
   }
 
+  /// @notice Tests if factory computes the correct address for the lendgine
   function testDeployAddress() external {
     address lendgineEstimate = LendgineAddress.computeAddress(address(factory), address(1), address(2), 18, 18, 1e18);
 
@@ -37,11 +39,13 @@ contract FactoryTest is Test {
     assertEq(lendgine, lendgineEstimate);
   }
 
+  /// @notice Tests if factory forbids using the same token for pair in Lendgine
   function testSameTokenError() external {
     vm.expectRevert(Factory.SameTokenError.selector);
     factory.createLendgine(address(1), address(1), 18, 18, 1e18);
   }
 
+  /// @notice Tests if factory forbids using zero address for tokens
   function testZeroAddressError() external {
     vm.expectRevert(Factory.ZeroAddressError.selector);
     factory.createLendgine(address(0), address(1), 18, 18, 1e18);
@@ -50,6 +54,7 @@ contract FactoryTest is Test {
     factory.createLendgine(address(1), address(0), 18, 18, 1e18);
   }
 
+  /// @notice Tests if factory forbids creating the lendgine with the same parameters more than once
   function testDeployedError() external {
     factory.createLendgine(address(1), address(2), 18, 18, 1e18);
 
@@ -57,6 +62,7 @@ contract FactoryTest is Test {
     factory.createLendgine(address(1), address(2), 18, 18, 1e18);
   }
 
+  /// @notice Helper function to check if parameters are zeroed after lendgine creation
   function helpParametersZero() private {
     (address token0, address token1, uint256 token0Scale, uint256 token1Scale, uint256 upperBound) =
       factory.parameters();
@@ -68,6 +74,7 @@ contract FactoryTest is Test {
     assertEq(0, upperBound);
   }
 
+  /// @notice Tests if factory parameters are zeroed before and after lendgine creation
   function testParameters() external {
     helpParametersZero();
 
@@ -76,23 +83,15 @@ contract FactoryTest is Test {
     helpParametersZero();
   }
 
-  function testEmit() external {
-    address lendgineEstimate = address(
-      uint160(
-        uint256(
-          keccak256(
-            abi.encodePacked(
-              hex"ff",
-              address(factory),
-              keccak256(abi.encode(address(1), address(2), 18, 18, 1e18)),
-              keccak256(type(Lendgine).creationCode)
-            )
-          )
-        )
-      )
-    );
+  /// @notice Tests if factory emits the correct event
+  function testFactoryEmit() external {
+    address lendgineEstimate = LendgineAddress.computeAddress(address(factory), address(1), address(2), 18, 18, 1e18);
+
+    // set up the expect emit
     vm.expectEmit(true, true, true, true, address(factory));
     emit LendgineCreated(address(1), address(2), 18, 18, 1e18, lendgineEstimate);
+    
+    // create the lendgine to check if the event was emitted
     factory.createLendgine(address(1), address(2), 18, 18, 1e18);
   }
 }
